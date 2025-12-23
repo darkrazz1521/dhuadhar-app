@@ -240,7 +240,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               )
                             : null,
                         onTap: () =>
-    Navigator.pushNamed(context, AppRoutes.labour),
+  Navigator.pushNamed(context, AppRoutes.labourHome),
+
 
                       ),
                       _HomeCard(

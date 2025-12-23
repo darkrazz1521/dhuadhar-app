@@ -47,7 +47,7 @@ class _LabourListScreenState extends State<LabourListScreen> {
       return '₹ ${l['dailyRate']} / day';
     }
     if (l['category'] == 'salary') {
-      return '₹ ${l['salary']} / month';
+      return '₹ ${l['monthlySalary']} / month';
     }
     if (l['category'] == 'production') {
       return '₹ ${l['productionRate']} / unit';

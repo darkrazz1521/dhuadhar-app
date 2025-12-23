@@ -41,6 +41,7 @@ import '../features/labour/screens/attendance_screen.dart';
 import '../features/labour/screens/salary_screen.dart';
 import '../features/labour/screens/labour_board_screen.dart';
 import '../features/labour/screens/production_screen.dart';
+import '../features/labour/screens/labour_home_screen.dart';
 
 
 
@@ -83,6 +84,8 @@ class AppRoutes {
   static const String labourBoard = '/labour-board';
   static const String moulder = '/moulder';
 static const String loader = '/loader';
+static const String labourHome = '/labour-home';
+
 
 
 
@@ -136,6 +139,8 @@ static const String loader = '/loader';
     labourBoard: (context) => const LabourBoardScreen(),
     moulder: (context) => const ProductionScreen(type: 'moulder'),
 loader: (context) => const ProductionScreen(type: 'loader'),
+labourHome: (context) => const LabourHomeScreen(),
+
 
 
 
