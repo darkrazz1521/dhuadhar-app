@@ -94,8 +94,7 @@ class _CreditScreenState extends State<CreditScreen> {
                                   builder: (_) => CreditDetailScreen(
                                     customerId:
                                         credit['customerId']['_id'],
-                                    customerName:
-                                        credit['customerId']['name'],
+                                    
                                   ),
                                 ),
                               );

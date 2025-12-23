@@ -4,12 +4,10 @@ import '../../../theme/app_colors.dart';
 
 class CreditPaymentHistoryScreen extends StatefulWidget {
   final String customerId;
-  final String customerName;
 
   const CreditPaymentHistoryScreen({
     super.key,
     required this.customerId,
-    required this.customerName,
   });
 
   @override
@@ -31,9 +29,8 @@ class _CreditPaymentHistoryScreenState
 
   Future<void> _loadPayments() async {
     try {
-      final data = await CreditService.getPaymentHistory(
-        widget.customerId,
-      );
+      final data =
+          await CreditService.getPaymentHistory(widget.customerId);
 
       setState(() {
         _payments = data;
@@ -80,8 +77,7 @@ class _CreditPaymentHistoryScreenState
                               ),
                             ),
                             subtitle: Text(
-                              _formatDate(
-                                  payment['createdAt']),
+                              _formatDate(payment['createdAt']),
                             ),
                             trailing: const Icon(
                               Icons.check_circle,

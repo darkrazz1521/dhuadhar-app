@@ -1,17 +1,18 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 
 import 'api_config.dart';
 import 'auth_service.dart';
 
 class SalesService {
-  /* -------------------- REPORT SUMMARY -------------------- */
-  static Future<Map<String, int>> getReportSummary() async {
+  /* --------------------------------------------------------
+   * GET TODAY SALES (Sales Board)
+   * ------------------------------------------------------ */
+  static Future<List<dynamic>> getTodaySales() async {
     final token = await AuthService.getToken();
 
     final response = await http.get(
-      Uri.parse('${ApiConfig.baseUrl}/reports/summary'),
+      Uri.parse('${ApiConfig.baseUrl}/sales/today'),
       headers: {
         'Authorization': 'Bearer $token',
       },
@@ -22,17 +23,45 @@ class SalesService {
       throw Exception('Session expired');
     }
 
-    final data = jsonDecode(response.body);
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load today sales');
+    }
 
-    return {
-      'totalSales': data['totalSales'],
-      'totalPaid': data['totalPaid'],
-      'totalDue': data['totalDue'],
-      'totalAdvance': data['totalAdvance'],
-    };
+    return jsonDecode(response.body) as List<dynamic>;
   }
 
-  /* -------------------- SET PRICE (OWNER) -------------------- */
+  /* --------------------------------------------------------
+   * GET PRICES (Sales Now + Price Setting)
+   * ------------------------------------------------------ */
+  static Future<Map<String, int>> getPrices() async {
+    final token = await AuthService.getToken();
+
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/prices'),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 401) {
+      await AuthService.logout();
+      throw Exception('Session expired');
+    }
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load prices');
+    }
+
+    final Map<String, dynamic> data = jsonDecode(response.body);
+
+    return data.map(
+      (key, value) => MapEntry(key, value as int),
+    );
+  }
+
+  /* --------------------------------------------------------
+   * SET PRICE (OWNER ONLY) ✅ FIXED
+   * ------------------------------------------------------ */
   static Future<bool> setPrice({
     required String category,
     required int rate,
@@ -59,32 +88,11 @@ class SalesService {
     return response.statusCode == 200;
   }
 
-  /* -------------------- GET PRICES -------------------- */
-  static Future<Map<String, int>> getPrices() async {
-    final token = await AuthService.getToken();
-
-    final response = await http.get(
-      Uri.parse('${ApiConfig.baseUrl}/prices'),
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
-    );
-
-    if (response.statusCode == 401) {
-      await AuthService.logout();
-      throw Exception('Session expired');
-    }
-
-    final List data = jsonDecode(response.body);
-
-    return {
-      for (var item in data) item['category']: item['rate'],
-    };
-  }
-
-  /* -------------------- CREATE SALE -------------------- */
+  /* --------------------------------------------------------
+   * CREATE SALE (customerId based) ✅ FINAL
+   * ------------------------------------------------------ */
   static Future<bool> createSale({
-    required String customerName,
+    required String customerId,
     required String category,
     required int quantity,
     required int paid,
@@ -98,7 +106,7 @@ class SalesService {
         'Authorization': 'Bearer $token',
       },
       body: jsonEncode({
-        'customerName': customerName,
+        'customerId': customerId,
         'category': category,
         'quantity': quantity,
         'paid': paid,
@@ -111,5 +119,30 @@ class SalesService {
     }
 
     return response.statusCode == 201;
+  }
+
+  /* --------------------------------------------------------
+   * REPORT SUMMARY (Reports Screen)
+   * ------------------------------------------------------ */
+  static Future<Map<String, dynamic>> getReportSummary() async {
+    final token = await AuthService.getToken();
+
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/reports/summary'),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 401) {
+      await AuthService.logout();
+      throw Exception('Session expired');
+    }
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load report summary');
+    }
+
+    return jsonDecode(response.body) as Map<String, dynamic>;
   }
 }

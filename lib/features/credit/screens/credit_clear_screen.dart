@@ -5,18 +5,17 @@ import '../../../core/utils/role_helper.dart';
 
 class CreditClearScreen extends StatefulWidget {
   final String customerId;
-  final String customerName;
   final int totalDue;
 
   const CreditClearScreen({
     super.key,
     required this.customerId,
-    required this.customerName,
     required this.totalDue,
   });
 
   @override
-  State<CreditClearScreen> createState() => _CreditClearScreenState();
+  State<CreditClearScreen> createState() =>
+      _CreditClearScreenState();
 }
 
 class _CreditClearScreenState extends State<CreditClearScreen> {
@@ -82,21 +81,23 @@ class _CreditClearScreenState extends State<CreditClearScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.customerName,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Current Due: ₹ ${widget.totalDue}',
-                  style: const TextStyle(
-                    color: AppColors.danger,
+                const Text(
+                  'Current Due',
+                  style: TextStyle(
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                const SizedBox(height: 4),
+                Text(
+                  '₹ ${widget.totalDue}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: AppColors.danger,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
                 const SizedBox(height: 24),
 
                 TextField(
@@ -115,8 +116,13 @@ class _CreditClearScreenState extends State<CreditClearScreen> {
                   child: ElevatedButton(
                     onPressed: _saving ? null : _clearCredit,
                     child: _saving
-                        ? const CircularProgressIndicator(
-                            color: Colors.white,
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
                           )
                         : const Text('Save Payment'),
                   ),

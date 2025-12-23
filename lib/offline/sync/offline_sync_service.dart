@@ -1,9 +1,12 @@
 import 'package:hive/hive.dart';
+
 import '../../services/sales_service.dart';
 import '../../core/utils/network_helper.dart';
 
 class OfflineSyncService {
-
+  /* --------------------------------------------------------
+   * SYNC OFFLINE SALES (customerId based)
+   * ------------------------------------------------------ */
   static Future<void> syncOfflineSales() async {
     final isOnline = await NetworkHelper.isOnline();
     if (!isOnline) return;
@@ -16,15 +19,17 @@ class OfflineSyncService {
 
       try {
         await SalesService.createSale(
-          customerName: data['customerName'],
+          customerId: data['customerId'],
           category: data['category'],
           quantity: data['quantity'],
           paid: data['paid'],
         );
 
-        box.delete(key); // remove after sync
-      } catch (_) {
-        break; // stop if backend fails
+        // ✅ remove only after successful sync
+        await box.delete(key);
+      } catch (e) {
+        // ❌ stop syncing if backend fails (retry later)
+        break;
       }
     }
   }

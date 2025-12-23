@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../../theme/app_colors.dart';
 import '../../../services/sales_service.dart';
-import '../../../core/utils/role_helper.dart';
 
 class PriceSettingScreen extends StatefulWidget {
   const PriceSettingScreen({super.key});
@@ -22,67 +19,42 @@ class _PriceSettingScreenState extends State<PriceSettingScreen> {
   }
 
   Future<void> _loadPrices() async {
-    final prices = await SalesService.getPrices();
-    prices.forEach((category, rate) {
-      _controllers[category] =
-          TextEditingController(text: rate.toString());
+    try {
+      final prices = await SalesService.getPrices();
+      for (final entry in prices.entries) {
+        _controllers[entry.key] =
+            TextEditingController(text: entry.value.toString());
+      }
+    } catch (e) {
+      // show error later
+    }
+
+    setState(() {
+      _loading = false;
     });
-    setState(() => _loading = false);
   }
 
   Future<void> _savePrice(String category) async {
-    final rate = int.tryParse(_controllers[category]!.text);
-    if (rate == null || rate <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter valid rate')),
-      );
-      return;
-    }
+    final rate = int.tryParse(_controllers[category]!.text) ?? 0;
+    if (rate <= 0) return;
 
-    final success =
-        await SalesService.setPrice(category: category, rate: rate);
+    await SalesService.setPrice(category: category, rate: rate);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          success ? 'Price updated' : 'Failed to update price',
-        ),
-      ),
+      const SnackBar(content: Text('Price updated')),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // 🔐 OWNER CHECK (UI LEVEL)
-    return FutureBuilder<bool>(
-      future: RoleHelper.isOwner(),
-      builder: (context, snapshot) {
-        // Loading role
-        if (!snapshot.hasData) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        // Not owner → Access denied
-        if (!snapshot.data!) {
-          return const Scaffold(
-            body: Center(
-              child: Text(
-                'Access denied',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          );
-        }
-
-        // Owner → Allow access
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Set Prices (Owner)'),
-          ),
-          body: _loading
-              ? const Center(child: CircularProgressIndicator())
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Set Prices (Owner)'),
+      ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _controllers.isEmpty
+              ? const Center(child: Text('No categories found'))
               : ListView(
                   padding: const EdgeInsets.all(16),
                   children: _controllers.keys.map((category) {
@@ -107,8 +79,9 @@ class _PriceSettingScreenState extends State<PriceSettingScreen> {
                                   child: TextField(
                                     controller: _controllers[category],
                                     keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Rate (₹ per brick)',
+                                    decoration:
+                                        const InputDecoration(
+                                      labelText: 'Rate',
                                       border: OutlineInputBorder(),
                                     ),
                                   ),
@@ -127,8 +100,6 @@ class _PriceSettingScreenState extends State<PriceSettingScreen> {
                     );
                   }).toList(),
                 ),
-        );
-      },
     );
   }
 }

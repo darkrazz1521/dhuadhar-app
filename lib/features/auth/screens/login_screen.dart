@@ -18,28 +18,36 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // 🔐 REAL LOGIN (BACKEND CONNECTED)
   void _login() async {
-    setState(() => _loading = true);
+  setState(() => _loading = true);
 
-    final success = await AuthService.login(
-      _usernameController.text.trim(),
-      _passwordController.text.trim(),
+  // 🔥 FORCE CLEAR OLD SESSION
+  await AuthService.logout();
+
+  final success = await AuthService.login(
+    _usernameController.text.trim(),
+    _passwordController.text.trim(),
+  );
+
+  setState(() => _loading = false);
+
+  if (!mounted) return;
+
+  if (success) {
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/home',
+      (_) => false,
     );
-
-    setState(() => _loading = false);
-
-    if (!mounted) return;
-
-    if (success) {
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Invalid login'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Invalid login'),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               // Logo
               Image.asset(
-                'assets/logos/dhuadhar_icon.png',
+                'assets/logos/icon/dhuadhar_icon.png',
                 width: 90,
               ),
 
