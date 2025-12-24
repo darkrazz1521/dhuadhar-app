@@ -5,6 +5,26 @@ import 'auth_service.dart';
 
 class CreditService {
 
+  static Future<Map<String, dynamic>> getCustomerSummary(
+  String customerId,
+) async {
+  final token = await AuthService.getToken();
+
+  final res = await http.get(
+    Uri.parse(
+      '${ApiConfig.baseUrl}/credit/customer/$customerId/summary',
+    ),
+    headers: {'Authorization': 'Bearer $token'},
+  );
+
+  if (res.statusCode != 200) {
+    throw Exception('Failed to load credit summary');
+  }
+
+  return jsonDecode(res.body);
+}
+
+
   static Future<List<dynamic>> getPaymentHistory(
   String customerId,
 ) async {

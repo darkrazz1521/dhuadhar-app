@@ -43,6 +43,8 @@ import '../features/labour/screens/labour_board_screen.dart';
 import '../features/labour/screens/production_screen.dart';
 import '../features/labour/screens/labour_home_screen.dart';
 
+import '../features/customer/screens/customer_list_screen.dart';
+
 
 
 
@@ -85,6 +87,11 @@ class AppRoutes {
   static const String moulder = '/moulder';
 static const String loader = '/loader';
 static const String labourHome = '/labour-home';
+
+static const String customers = '/customers';
+static const String customerDetail = '/customer-detail';
+
+
 
 
 
@@ -140,6 +147,9 @@ static const String labourHome = '/labour-home';
     moulder: (context) => const ProductionScreen(type: 'moulder'),
 loader: (context) => const ProductionScreen(type: 'loader'),
 labourHome: (context) => const LabourHomeScreen(),
+
+customers: (context) => const CustomerListScreen(),
+
 
 
 

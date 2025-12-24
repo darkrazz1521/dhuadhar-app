@@ -100,7 +100,7 @@ class _AddLabourScreenState extends State<AddLabourScreen> {
 
             // CATEGORY
             DropdownButtonFormField<String>(
-              value: _category,
+              initialValue: _category,
               decoration:
                   const InputDecoration(labelText: 'Labour Category'),
               items: const [
@@ -116,7 +116,7 @@ class _AddLabourScreenState extends State<AddLabourScreen> {
 
             // WORK TYPE (FIXED OPTIONS)
             DropdownButtonFormField<String>(
-              value: _workType,
+              initialValue: _workType,
               decoration:
                   const InputDecoration(labelText: 'Work Type'),
               items: _workTypes

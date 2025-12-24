@@ -32,4 +32,19 @@ class CustomerService {
     }
     return jsonDecode(res.body);
   }
+
+  static Future<List<dynamic>> getCustomers() async {
+    final token = await AuthService.getToken();
+
+    final res = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/customers'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (res.statusCode != 200) {
+      throw Exception('Failed to load customers');
+    }
+
+    return jsonDecode(res.body);
+  }
 }

@@ -111,10 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         SizedBox(height: 2),
                         Text(
                           'Today',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.black45,
-                          ),
+                          style: TextStyle(fontSize: 12, color: Colors.black45),
                         ),
                       ],
                     ),
@@ -163,45 +160,38 @@ class _HomeScreenState extends State<HomeScreen> {
                       title: 'Sales Now',
                       icon: Icons.add_shopping_cart,
                       color: AppColors.primary,
-                      onTap: () =>
-                          Navigator.pushNamed(context, '/sales-now'),
+                      onTap: () => Navigator.pushNamed(context, '/sales-now'),
                     ),
                     _HomeCard(
                       title: 'Advance Order',
                       icon: Icons.inventory_2_outlined,
                       color: AppColors.success,
-                      badge: (_summary != null &&
-                              _summary!['pendingAdvances'] > 0)
+                      badge:
+                          (_summary != null && _summary!['pendingAdvances'] > 0)
                           ? AppBadge(
-                              text:
-                                  _summary!['pendingAdvances'].toString(),
+                              text: _summary!['pendingAdvances'].toString(),
                               color: Colors.orange,
                             )
                           : null,
-                      onTap: () =>
-                          Navigator.pushNamed(context, '/advance'),
+                      onTap: () => Navigator.pushNamed(context, '/advance'),
                     ),
                     _HomeCard(
                       title: 'Credit',
                       icon: Icons.account_balance_wallet_outlined,
                       color: AppColors.danger,
-                      badge: (_summary != null &&
-                              _summary!['creditDue'] > 0)
+                      badge: (_summary != null && _summary!['creditDue'] > 0)
                           ? AppBadge(
-                              text:
-                                  '₹${_summary!['creditDue']}',
+                              text: '₹${_summary!['creditDue']}',
                               color: Colors.red,
                             )
                           : null,
-                      onTap: () =>
-                          Navigator.pushNamed(context, '/credit'),
+                      onTap: () => Navigator.pushNamed(context, '/credit'),
                     ),
                     _HomeCard(
                       title: 'Sales Board',
                       icon: Icons.bar_chart_rounded,
                       color: Colors.blueGrey,
-                      onTap: () =>
-                          Navigator.pushNamed(context, '/sales-board'),
+                      onTap: () => Navigator.pushNamed(context, '/sales-board'),
                     ),
                   ],
                 ),
@@ -214,8 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   // ================= MANAGEMENT =================
                   const Text(
                     'Management',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 12),
 
@@ -231,18 +220,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         title: 'Labour',
                         icon: Icons.groups_outlined,
                         color: Colors.teal,
-                        badge: (_summary != null &&
+                        badge:
+                            (_summary != null &&
                                 _summary!['salaryPendingCount'] > 0)
                             ? AppBadge(
-                                text:
-                                    '${_summary!['salaryPendingCount']}',
+                                text: '${_summary!['salaryPendingCount']}',
                                 color: Colors.deepOrange,
                               )
                             : null,
                         onTap: () =>
-  Navigator.pushNamed(context, AppRoutes.labourHome),
-
-
+                            Navigator.pushNamed(context, AppRoutes.labourHome),
                       ),
                       _HomeCard(
                         title: 'Expenditure',
@@ -255,15 +242,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         title: 'Reports',
                         icon: Icons.receipt_long_outlined,
                         color: Colors.blueGrey,
-                        onTap: () =>
-                            Navigator.pushNamed(context, '/reports'),
+                        onTap: () => Navigator.pushNamed(context, '/reports'),
                       ),
                       _HomeCard(
                         title: 'Set Prices',
                         icon: Icons.price_change_outlined,
                         color: AppColors.primary,
+                        onTap: () => Navigator.pushNamed(context, '/prices'),
+                      ),
+                      _HomeCard(
+                        title: 'Customers',
+                        icon: Icons.people_outline,
+                        color: Colors.indigo,
                         onTap: () =>
-                            Navigator.pushNamed(context, '/prices'),
+                            Navigator.pushNamed(context, AppRoutes.customers),
                       ),
                     ],
                   ),
@@ -308,7 +300,8 @@ class _HomeCard extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
             ),
-            child: SizedBox.expand( // 🔥 FIX 2 (MOST IMPORTANT)
+            child: SizedBox.expand(
+              // 🔥 FIX 2 (MOST IMPORTANT)
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   vertical: 22,
@@ -333,8 +326,7 @@ class _HomeCard extends StatelessWidget {
               ),
             ),
           ),
-          if (badge != null)
-            Positioned(top: 8, right: 8, child: badge!),
+          if (badge != null) Positioned(top: 8, right: 8, child: badge!),
         ],
       ),
     );

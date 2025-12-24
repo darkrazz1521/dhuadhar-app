@@ -5,6 +5,26 @@ import 'api_config.dart';
 import 'auth_service.dart';
 
 class SalesService {
+
+  static Future<List<dynamic>> getSalesByCustomer(
+  String customerId,
+) async {
+  final token = await AuthService.getToken();
+
+  final res = await http.get(
+    Uri.parse(
+      '${ApiConfig.baseUrl}/sales/customer/$customerId',
+    ),
+    headers: {'Authorization': 'Bearer $token'},
+  );
+
+  if (res.statusCode != 200) {
+    throw Exception('Failed to load sales');
+  }
+
+  return jsonDecode(res.body);
+}
+
   /* --------------------------------------------------------
    * GET TODAY SALES (Sales Board)
    * ------------------------------------------------------ */
@@ -120,6 +140,26 @@ class SalesService {
 
     return response.statusCode == 201;
   }
+
+  static Future<Map<String, dynamic>> getSaleDetail(
+  String saleId,
+) async {
+  final token = await AuthService.getToken();
+
+  final res = await http.get(
+    Uri.parse(
+      '${ApiConfig.baseUrl}/sales/$saleId/detail',
+    ),
+    headers: {'Authorization': 'Bearer $token'},
+  );
+
+  if (res.statusCode != 200) {
+    throw Exception('Failed to load sale detail');
+  }
+
+  return jsonDecode(res.body);
+}
+
 
   /* --------------------------------------------------------
    * REPORT SUMMARY (Reports Screen)
