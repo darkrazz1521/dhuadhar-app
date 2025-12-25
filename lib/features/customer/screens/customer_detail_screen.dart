@@ -21,11 +21,17 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   }
 
   Future<void> _load() async {
-    final data = await SalesService.getSalesByCustomer(widget.customerId);
+    final data =
+        await SalesService.getSalesByCustomer(widget.customerId);
     setState(() {
       _sales = data;
       _loading = false;
     });
+  }
+
+  String _formatDate(String iso) {
+    final d = DateTime.parse(iso);
+    return '${d.day}-${d.month}-${d.year}';
   }
 
   @override
@@ -35,50 +41,69 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _sales.isEmpty
-          ? const Center(child: Text('No sales found'))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _sales.length,
-              itemBuilder: (_, i) {
-                final s = _sales[i];
-                final date = DateTime.parse(s['createdAt']);
+              ? const Center(child: Text('No sales found'))
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _sales.length,
+                  itemBuilder: (_, i) {
+                    final s = _sales[i];
 
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: ListTile(
-                    title: Text(
-                      '${date.day}-${date.month}-${date.year}',
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Qty: ${s['quantity']}'),
-                        Text('Total: ₹${s['totalAmount']}'),
-                        Text(
-                          'Due: ₹${s['dueAmount']}',
-                          style: TextStyle(
-                            color: s['dueAmount'] > 0
-                                ? Colors.red
-                                : Colors.green,
+                    final int total = s['total'] ?? 0;
+                    final int paid = s['paid'] ?? 0;
+                    final int due = s['due'] ?? 0;
+
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: ListTile(
+                        title: Text(
+                          _formatDate(s['createdAt']),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ],
-                    ),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => SaleDetailScreen(saleId: s['_id']),
+                        subtitle: Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                          children: [
+                            Text('Category: ${s['category']}'),
+                            Text('Quantity: ${s['quantity']}'),
+                            Text('Total: ₹$total'),
+                            Text(
+                              'Paid: ₹$paid',
+                              style: const TextStyle(
+                                color: Colors.green,
+                              ),
+                            ),
+                            Text(
+                              'Due: ₹$due',
+                              style: TextStyle(
+                                color: due > 0
+                                    ? Colors.red
+                                    : Colors.green,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                    
-                  ),
-                );
-              },
-            ),
+                        trailing: const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 14,
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  SaleDetailScreen(
+                                saleId: s['_id'],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
     );
   }
 }

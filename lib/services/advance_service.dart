@@ -5,9 +5,29 @@ import 'api_config.dart';
 import 'auth_service.dart';
 
 class AdvanceService {
+
+  static Future<Map<String, dynamic>> getAdvanceDetail(
+  String advanceId,
+) async {
+  final token = await AuthService.getToken();
+
+  final res = await http.get(
+    Uri.parse('${ApiConfig.baseUrl}/advance/$advanceId/detail'),
+    headers: {'Authorization': 'Bearer $token'},
+  );
+
+  if (res.statusCode != 200) {
+    throw Exception('Failed to load advance detail');
+  }
+
+  return jsonDecode(res.body);
+}
+
+
   /* --------------------------------------------------
      CREATE ADVANCE (✅ customerId based)
   -------------------------------------------------- */
+
   static Future<bool> createAdvance({
     required String customerId,
     required String category,

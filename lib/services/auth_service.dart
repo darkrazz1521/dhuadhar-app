@@ -8,33 +8,36 @@ import 'api_config.dart';
 class AuthService {
   /* -------------------- LOGIN -------------------- */
   static Future<bool> login(String username, String password) async {
-    try {
-      final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'username': username,
-          'password': password,
-        }),
-      );
+  try {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/auth/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'username': username,
+        'password': password,
+      }),
+    );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final prefs = await SharedPreferences.getInstance();
+    print('STATUS: ${response.statusCode}');
+    print('BODY: ${response.body}');
 
-        // 🔐 Save token
-        await prefs.setString('token', data['token']);
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final prefs = await SharedPreferences.getInstance();
 
-        // 📦 Save role (IMPORTANT)
-        await prefs.setString('role', data['user']['role']);
+      await prefs.setString('token', data['token']);
+      await prefs.setString('role', data['user']['role']);
 
-        return true;
-      }
-      return false;
-    } catch (_) {
-      return false;
+      return true;
     }
+
+    return false;
+  } catch (e) {
+    print('LOGIN ERROR: $e');
+    return false;
   }
+}
+
 
   /* -------------------- LOGOUT -------------------- */
   static Future<void> logout() async {

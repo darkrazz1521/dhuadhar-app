@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 
 import '../../../theme/app_colors.dart';
 import '../../../services/sales_service.dart';
-import '../../../core/utils/network_helper.dart';
 import '../../../core/widgets/customer_search_sheet.dart';
 
 class SalesNowScreen extends StatefulWidget {
@@ -21,6 +19,7 @@ class _SalesNowScreenState extends State<SalesNowScreen> {
 
   Map<String, int> _rates = {};
   String? _selectedCategory;
+
   bool _loadingPrices = true;
   bool _saving = false;
 
@@ -38,16 +37,25 @@ class _SalesNowScreenState extends State<SalesNowScreen> {
 
     setState(() {
       _rates = prices;
-      _selectedCategory = prices.isNotEmpty ? prices.keys.first : null;
+
+      // 🔥 CRITICAL FIX
+      if (_rates.isNotEmpty) {
+        _selectedCategory = _rates.keys.first;
+      }
+
       _loadingPrices = false;
     });
   }
 
-  int get _rate =>
-      _selectedCategory != null ? _rates[_selectedCategory]! : 0;
+  /* ---------------- CALCULATIONS ---------------- */
+  int get _rate {
+    if (_selectedCategory == null) return 0;
+    return _rates[_selectedCategory] ?? 0;
+  }
 
   int get _quantity => int.tryParse(_quantityController.text) ?? 0;
   int get _paid => int.tryParse(_paidController.text) ?? 0;
+
   int get _total => _rate * _quantity;
   int get _due => (_total - _paid).clamp(0, _total);
 
@@ -57,7 +65,7 @@ class _SalesNowScreenState extends State<SalesNowScreen> {
       _quantity > 0 &&
       !_saving;
 
-  /* ---------------- RESET FORM ---------------- */
+  /* ---------------- RESET ---------------- */
   void _resetForm() {
     setState(() {
       selectedCustomer = null;
@@ -72,41 +80,26 @@ class _SalesNowScreenState extends State<SalesNowScreen> {
 
     setState(() => _saving = true);
 
-    final isOnline = await NetworkHelper.isOnline();
-
     try {
-      if (isOnline) {
-        await SalesService.createSale(
-          customerId: selectedCustomer!['_id'],
-          category: _selectedCategory!,
-          quantity: _quantity,
-          paid: _paid,
-        );
+      await SalesService.createSale(
+        customerId: selectedCustomer!['_id'],
+        category: _selectedCategory!,
+        quantity: _quantity,
+        paid: _paid,
+      );
 
-        if (!mounted) return;
+      if (!mounted) return;
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sale saved successfully')),
-        );
-      } else {
-        final box = Hive.box('offline_sales');
-        box.add({
-          'customerId': selectedCustomer!['_id'],
-          'category': _selectedCategory,
-          'quantity': _quantity,
-          'paid': _paid,
-          'createdAt': DateTime.now().toIso8601String(),
-        });
-
-        if (!mounted) return;
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Offline: Sale queued')),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sale saved successfully')),
+      );
 
       _resetForm();
       Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to save sale')),
+      );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -151,9 +144,7 @@ class _SalesNowScreenState extends State<SalesNowScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            subtitle: Text(
-                              selectedCustomer!['mobile'] ?? '',
-                            ),
+                            subtitle: Text(selectedCustomer!['mobile'] ?? ''),
                             trailing: TextButton(
                               onPressed: () =>
                                   setState(() => selectedCustomer = null),
@@ -166,16 +157,18 @@ class _SalesNowScreenState extends State<SalesNowScreen> {
 
                   /* -------- CATEGORY -------- */
                   DropdownButtonFormField<String>(
-                    initialValue: _selectedCategory,
-                    items: _rates.keys
-                        .map(
-                          (cat) => DropdownMenuItem(
-                            value: cat,
-                            child: Text(cat),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (v) => setState(() => _selectedCategory = v),
+                    value: _selectedCategory,
+                    items: _rates.keys.map((cat) {
+                      return DropdownMenuItem(
+                        value: cat,
+                        child: Text(cat),
+                      );
+                    }).toList(),
+                    onChanged: (v) {
+                      setState(() {
+                        _selectedCategory = v;
+                      });
+                    },
                     decoration: const InputDecoration(
                       labelText: 'Brick Category',
                       border: OutlineInputBorder(),
@@ -222,9 +215,7 @@ class _SalesNowScreenState extends State<SalesNowScreen> {
                     child: ElevatedButton(
                       onPressed: _canSave ? _saveSale : null,
                       child: _saving
-                          ? const CircularProgressIndicator(
-                              color: Colors.white,
-                            )
+                          ? const CircularProgressIndicator(color: Colors.white)
                           : const Text('Save Sale'),
                     ),
                   ),

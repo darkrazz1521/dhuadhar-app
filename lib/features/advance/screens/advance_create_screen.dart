@@ -209,7 +209,9 @@ class _AdvanceCreateScreenState
                   TextField(
                     controller: _quantityController,
                     keyboardType: TextInputType.number,
-                    onChanged: (_) => setState(() {}),
+                    onChanged: (v) {
+  setState(() {});
+},
                     decoration: const InputDecoration(
                       labelText: 'Quantity',
                       border: OutlineInputBorder(),
@@ -229,7 +231,9 @@ class _AdvanceCreateScreenState
                   TextField(
                     controller: _advanceController,
                     keyboardType: TextInputType.number,
-                    onChanged: (_) => setState(() {}),
+                    onChanged: (v) {
+  setState(() {});
+},
                     decoration: const InputDecoration(
                       labelText: 'Advance Paid',
                       border: OutlineInputBorder(),

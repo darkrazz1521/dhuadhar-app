@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../theme/app_colors.dart';
 import '../../../services/advance_service.dart';
 import '../../../core/utils/role_helper.dart';
+import 'advance_detail_screen.dart'; // ✅ ADD
 
 class AdvanceOrderScreen extends StatefulWidget {
   const AdvanceOrderScreen({super.key});
@@ -26,9 +27,8 @@ class _AdvanceOrderScreenState extends State<AdvanceOrderScreen> {
     try {
       final data = await AdvanceService.getAdvances();
 
-      final activeOrders = data
-          .where((o) => o['status'] != 'delivered')
-          .toList();
+      final activeOrders =
+          data.where((o) => o['status'] != 'delivered').toList();
 
       setState(() {
         _orders = activeOrders;
@@ -72,7 +72,8 @@ class _AdvanceOrderScreenState extends State<AdvanceOrderScreen> {
               if (qty <= 0 || qty > maxQty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Enter quantity between 1 and $maxQty'),
+                    content:
+                        Text('Enter quantity between 1 and $maxQty'),
                   ),
                 );
                 return;
@@ -107,124 +108,169 @@ class _AdvanceOrderScreenState extends State<AdvanceOrderScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.history),
-            onPressed: () => Navigator.pushNamed(context, '/advance-history'),
+            onPressed: () =>
+                Navigator.pushNamed(context, '/advance-history'),
           ),
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => Navigator.pushNamed(context, '/advance-create'),
+            onPressed: () =>
+                Navigator.pushNamed(context, '/advance-create'),
           ),
         ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error
-          ? const Center(child: Text('Failed to load advance orders'))
-          : _orders.isEmpty
-          ? const Center(
-              child: Text(
-                'No active advance orders',
-                style: TextStyle(color: Colors.black54),
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _orders.length,
-              itemBuilder: (context, index) {
-                final order = _orders[index];
-                final customer = order['customerId'];
+              ? const Center(
+                  child: Text('Failed to load advance orders'),
+                )
+              : _orders.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'No active advance orders',
+                        style: TextStyle(color: Colors.black54),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _orders.length,
+                      itemBuilder: (context, index) {
+                        final order = _orders[index];
+                        final customer = order['customerId'];
 
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 👤 CUSTOMER
-                        Text(
-                          customer?['name'] ?? 'Unknown',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        if (customer?['mobile'] != null)
-                          Text(
-                            '📞 ${customer['mobile']}',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        if (customer?['address'] != null)
-                          Text(
-                            '📍 ${customer['address']}',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey,
-                            ),
-                          ),
-
-                        const Divider(height: 20),
-
-                        // 📦 ORDER DETAILS
-                        _row('Category', order['category']),
-                        _row('Quantity', order['quantity'].toString()),
-                        _row('Rate', '₹ ${order['rate']}'),
-                        _row('Total', '₹ ${order['total']}'),
-
-                        const SizedBox(height: 6),
-
-                        _row(
-                          'Advance Paid',
-                          '₹ ${order['advance']}',
-                          AppColors.success,
-                        ),
-                        _row(
-                          'Remaining Balance',
-                          '₹ ${order['remaining']}',
-                          AppColors.danger,
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        // 🔐 OWNER ACTION
-                        FutureBuilder<bool>(
-                          future: RoleHelper.isOwner(),
-                          builder: (context, snapshot) {
-                            if (snapshot.data == true &&
-                                order['status'] != 'delivered') {
-                              return Align(
-                                alignment: Alignment.centerRight,
-                                child: TextButton(
-                                  onPressed: () => _openPartialDialog(order),
-                                  child: const Text('Deliver'),
+                        return InkWell(
+                          // ✅ TAP → DETAIL SCREEN
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => AdvanceDetailScreen(
+                                  advanceId: order['_id'],
                                 ),
-                              );
-                            }
-
-                            if (order['status'] == 'delivered') {
-                              return const Text(
-                                'Delivered',
-                                style: TextStyle(
-                                  color: AppColors.success,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              );
-                            }
-
-                            return const SizedBox();
+                              ),
+                            );
                           },
-                        ),
-                      ],
+                          child: Card(
+                            margin:
+                                const EdgeInsets.only(bottom: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(14),
+                            ),
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.all(14),
+                              child: Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                children: [
+                                  // 👤 CUSTOMER
+                                  Text(
+                                    customer?['name'] ??
+                                        'Unknown',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight:
+                                          FontWeight.w600,
+                                    ),
+                                  ),
+                                  if (customer?['mobile'] !=
+                                      null)
+                                    Text(
+                                      '📞 ${customer['mobile']}',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  if (customer?['address'] !=
+                                      null)
+                                    Text(
+                                      '📍 ${customer['address']}',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+
+                                  const Divider(height: 20),
+
+                                  _row(
+                                      'Category',
+                                      order['category']),
+                                  _row(
+                                      'Quantity',
+                                      order['quantity']
+                                          .toString()),
+                                  _row('Rate',
+                                      '₹ ${order['rate']}'),
+                                  _row('Total',
+                                      '₹ ${order['total']}'),
+
+                                  const SizedBox(height: 6),
+
+                                  _row(
+                                    'Advance Paid',
+                                    '₹ ${order['advance']}',
+                                    AppColors.success,
+                                  ),
+                                  _row(
+                                    'Remaining Balance',
+                                    '₹ ${order['remaining']}',
+                                    AppColors.danger,
+                                  ),
+
+                                  const SizedBox(height: 12),
+
+                                  // 🔐 OWNER ACTION
+                                  FutureBuilder<bool>(
+                                    future:
+                                        RoleHelper.isOwner(),
+                                    builder:
+                                        (context, snapshot) {
+                                      if (snapshot.data ==
+                                              true &&
+                                          order['status'] !=
+                                              'delivered') {
+                                        return Align(
+                                          alignment:
+                                              Alignment
+                                                  .centerRight,
+                                          child: TextButton(
+                                            onPressed: () =>
+                                                _openPartialDialog(
+                                                    order),
+                                            child: const Text(
+                                                'Deliver'),
+                                          ),
+                                        );
+                                      }
+
+                                      if (order['status'] ==
+                                          'delivered') {
+                                        return const Text(
+                                          'Delivered',
+                                          style: TextStyle(
+                                            color:
+                                                AppColors
+                                                    .success,
+                                            fontWeight:
+                                                FontWeight
+                                                    .bold,
+                                          ),
+                                        );
+                                      }
+
+                                      return const SizedBox();
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  ),
-                );
-              },
-            ),
     );
   }
 
@@ -232,11 +278,13 @@ class _AdvanceOrderScreenState extends State<AdvanceOrderScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment:
+            MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 14, color: Colors.black54),
+            style: const TextStyle(
+                fontSize: 14, color: Colors.black54),
           ),
           Text(
             value,

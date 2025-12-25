@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../services/customer_service.dart';
-import 'customer_credit_screen.dart';
+import 'customer_detail_screen.dart';
 
 class CustomerListScreen extends StatefulWidget {
   const CustomerListScreen({super.key});
 
   @override
-  State<CustomerListScreen> createState() =>
-      _CustomerListScreenState();
+  State<CustomerListScreen> createState() => _CustomerListScreenState();
 }
 
 class _CustomerListScreenState extends State<CustomerListScreen> {
@@ -36,50 +35,41 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _items.isEmpty
-              ? const Center(child: Text('No customers found'))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _items.length,
-                  itemBuilder: (_, i) {
-                    final c = _items[i];
+          ? const Center(child: Text('No customers found'))
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _items.length,
+              itemBuilder: (_, i) {
+                final c = _items[i];
 
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        title: Text(
-                          c['name'],
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                          ),
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    title: Text(
+                      c['name'],
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('📞 ${c['mobile']}'),
+                        if (c['address'] != null) Text('📍 ${c['address']}'),
+                      ],
+                    ),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              CustomerDetailScreen(customerId: c['_id']),
                         ),
-                        subtitle: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                          children: [
-                            Text('📞 ${c['mobile']}'),
-                            if (c['address'] != null)
-                              Text('📍 ${c['address']}'),
-                          ],
-                        ),
-                        trailing: const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 14,
-                        ),
-                        onTap: () {
-                          Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (_) => CustomerCreditScreen(
-      customerId: c['_id'],
-    ),
-  ),
-);
-
-                        },
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
     );
   }
 }

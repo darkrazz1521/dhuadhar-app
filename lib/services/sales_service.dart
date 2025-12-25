@@ -111,35 +111,36 @@ class SalesService {
   /* --------------------------------------------------------
    * CREATE SALE (customerId based) ✅ FINAL
    * ------------------------------------------------------ */
-  static Future<bool> createSale({
-    required String customerId,
-    required String category,
-    required int quantity,
-    required int paid,
-  }) async {
-    final token = await AuthService.getToken();
+  static Future<String> createSale({
+  required String customerId,
+  required String category,
+  required int quantity,
+  required int paid,
+}) async {
+  final token = await AuthService.getToken();
 
-    final response = await http.post(
-      Uri.parse('${ApiConfig.baseUrl}/sales'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
-        'customerId': customerId,
-        'category': category,
-        'quantity': quantity,
-        'paid': paid,
-      }),
-    );
+  final response = await http.post(
+    Uri.parse('${ApiConfig.baseUrl}/sales'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode({
+      'customerId': customerId,
+      'category': category,
+      'quantity': quantity,
+      'paid': paid,
+    }),
+  );
 
-    if (response.statusCode == 401) {
-      await AuthService.logout();
-      throw Exception('Session expired');
-    }
-
-    return response.statusCode == 201;
+  if (response.statusCode != 201) {
+    throw Exception('Failed to create sale');
   }
+
+  final data = jsonDecode(response.body);
+  return data['saleId']; // 🔥 IMPORTANT
+}
+
 
   static Future<Map<String, dynamic>> getSaleDetail(
   String saleId,
@@ -159,6 +160,25 @@ class SalesService {
 
   return jsonDecode(res.body);
 }
+
+static Future<List<dynamic>> getCustomerSales(String customerId) async {
+    final token = await AuthService.getToken();
+
+    final res = await http.get(
+      Uri.parse(
+        '${ApiConfig.baseUrl}/sales?customerId=$customerId',
+      ),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (res.statusCode != 200) {
+      throw Exception('Failed to load sales');
+    }
+
+    return jsonDecode(res.body);
+  }
 
 
   /* --------------------------------------------------------
@@ -185,4 +205,37 @@ class SalesService {
 
     return jsonDecode(response.body) as Map<String, dynamic>;
   }
+
+  /* --------------------------------------------------------
+ * PAY AGAINST A SPECIFIC SALE (STEP-8)
+ * ------------------------------------------------------ */
+static Future<bool> paySale({
+  required String saleId,
+  required int amount,
+}) async {
+  final token = await AuthService.getToken();
+
+  final response = await http.post(
+    Uri.parse('${ApiConfig.baseUrl}/sales/$saleId/pay'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode({
+      'amount': amount,
+    }),
+  );
+
+  if (response.statusCode == 401) {
+    await AuthService.logout();
+    throw Exception('Session expired');
+  }
+
+  if (response.statusCode != 200) {
+    throw Exception('Failed to record sale payment');
+  }
+
+  return true;
+}
+
 }

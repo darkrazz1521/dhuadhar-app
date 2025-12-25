@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../services/credit_service.dart';
 import '../../../theme/app_colors.dart';
 
@@ -32,11 +33,14 @@ class _CreditPaymentHistoryScreenState
       final data =
           await CreditService.getPaymentHistory(widget.customerId);
 
+      if (!mounted) return;
+
       setState(() {
         _payments = data;
         _loading = false;
       });
-    } catch (_) {
+    } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = true;
         _loading = false;
@@ -54,7 +58,7 @@ class _CreditPaymentHistoryScreenState
           ? const Center(child: CircularProgressIndicator())
           : _error
               ? const Center(
-                  child: Text('Failed to load history'),
+                  child: Text('Failed to load payment history'),
                 )
               : _payments.isEmpty
                   ? const Center(
@@ -66,19 +70,26 @@ class _CreditPaymentHistoryScreenState
                       itemBuilder: (context, index) {
                         final payment = _payments[index];
 
+                        final amount = payment['amount'] ?? 0;
+                        final createdAt =
+                            payment['createdAt'] as String?;
+
                         return Card(
-                          margin:
-                              const EdgeInsets.only(bottom: 12),
+                          margin: const EdgeInsets.only(bottom: 12),
                           child: ListTile(
+                            leading: const Icon(
+                              Icons.payments,
+                              color: AppColors.success,
+                            ),
                             title: Text(
-                              '₹ ${payment['amount']}',
+                              '₹ $amount',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            subtitle: Text(
-                              _formatDate(payment['createdAt']),
-                            ),
+                            subtitle: createdAt != null
+                                ? Text(_formatDate(createdAt))
+                                : const Text('—'),
                             trailing: const Icon(
                               Icons.check_circle,
                               color: AppColors.success,
@@ -91,7 +102,11 @@ class _CreditPaymentHistoryScreenState
   }
 
   String _formatDate(String iso) {
-    final date = DateTime.parse(iso);
-    return '${date.day}/${date.month}/${date.year}';
+    try {
+      final date = DateTime.parse(iso);
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (_) {
+      return '';
+    }
   }
 }
